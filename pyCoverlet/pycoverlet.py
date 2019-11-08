@@ -1,4 +1,3 @@
-import sys
 import json
 
 class FunctionReport:
@@ -89,4 +88,5 @@ def buildReport(p):
 	builtReports.menu()
 
 if __name__ == '__main__':
+	import sys
 	buildReport(sys.argv[1])
