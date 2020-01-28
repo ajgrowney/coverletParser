@@ -1,42 +1,44 @@
 import json
 
-class FunctionReport:
-	def __init__(self,namespace, n,rep):
-		self.namespace = namespace
-		self.fullname = n
-		self.name = n.split("::")[1]
-		self.lines = rep["Lines"]
-		self.branches = rep["Branches"]
+class FunctionObj:
+	def __init__(self, fcnNamespace, fcnName, fcnReport):
+		self.namespace = fcnNamespace
+		self.fullname = fcnName
+		self.name = fcnName.split("::")[1]
+		self.lines = fcnReport["Lines"]
+		self.branches = fcnReport["Branches"]
 		self.ignore = False
 		self.covered_lines, self.missed_lines = self.lineReportCount(self.lines)
 	
-	def lineReportCount(self,d):
-		covered, missed = 0,0
-		for k,v in d.items():
-			if v==0: missed += 1
-			else: covered += 1 
-		return covered, missed
+	def lineReportCount(self,allLins):
+		lines_covered, lines_missed = 0, 0
+		for line_number, times_covered in allLins.items():
+			if ( times_covered == 0 ): lines_missed += 1
+			else: lines_covered += 1
+		
+		return lines_covered, lines_missed
 
-class ReportsContainer:
-	def __init__(self,path):
+class CoverageHelper:
+	def __init__(self,coverletpath):
 		self.namespaces = []
 		self.reports = []
-		self.path = path
-		self.buildReports()
+		self.inputfilepath = coverletpath
+		self.buildCoverageHelper()
 	
-	def buildReports(self):
+	def buildCoverageHelper(self):
 		current_reports = []
 		current_namespaces = []
-		with open(self.path) as json_file:
+		with open(self.inputfilepath) as json_file:
 			f = json.load(json_file)
 			dlls = f.keys()
 			for dll in dlls:
-				for _filepath, _namespace in f[dll].items():
-					for _name, _report in _namespace.items():
+				for filepath, namespace in f[dll].items():
+					for _name, _report in namespace.items():
 						current_namespaces.append(_name)
 						for _functionDefinition, _coverage in _report.items():
-							fr = FunctionReport(_name,_functionDefinition,_coverage)
+							fr = FunctionObj(_name,_functionDefinition,_coverage)
 							current_reports.append(fr)
+
 		current_reports.sort(key=lambda x: x.missed_lines, reverse=True)
 		self.reports = current_reports
 		self.namespaces = current_namespaces
@@ -53,7 +55,7 @@ class ReportsContainer:
 			if(choice == "2"): self.viewMissingCoverage()
 			if(choice == "3"): self.searchByFunctionName(input("Function Name: "))
 			if(choice == "4"): self.searchByNamespace(input("Namespace: "))	
-			if(choice == "5"): self.buildReports()
+			if(choice == "5"): self.buildCoverageHelper()
 	
 	def viewMissingCoverage(self):
 		for r in self.reports:
@@ -82,11 +84,10 @@ class ReportsContainer:
 
 
 
-def buildReport(p):
-	filepath = p
-	builtReports = ReportsContainer(filepath)
-	builtReports.menu()
+def main(filepath):
+	coverageHelper = CoverageHelper(filepath)
+	coverageHelper.menu()
 
 if __name__ == '__main__':
 	import sys
-	buildReport(sys.argv[1])
+	main(sys.argv[1])
