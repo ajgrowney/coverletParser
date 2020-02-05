@@ -1,4 +1,5 @@
 import json
+import sys
 
 class FunctionObj:
 	def __init__(self, fcnNamespace, fcnName, fcnReport):
@@ -45,7 +46,13 @@ class CoverageHelper:
 	
 
 	def menu(self):
-		menuoptions = "1: View All\n2: View Missing Coverage\n3: Search by Function Name\n4: Search by Namespace\n5: Reload\n6:Exit\n"
+		menuoptions = "1: View All\n" \
+			"2: View Missing Coverage\n" \
+			"3: Search by Function Name\n" \
+			"4: Search by Namespace\n" \
+			"5: Reload\n" \
+			"6:Exit\n"
+			
 		choice = 0
 		while(choice != "6"):
 			print("\n------------------------")
@@ -89,5 +96,5 @@ def main(filepath):
 	coverageHelper.menu()
 
 if __name__ == '__main__':
-	import sys
-	main(sys.argv[1])
+    filepath=sys.argv[1] if len(sys.argv) > 1 else input("Enter filepath to coverage.json:")
+    main(filepath)
